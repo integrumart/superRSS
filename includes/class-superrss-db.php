@@ -45,9 +45,11 @@ class SuperRSS_DB {
         global $wpdb;
         $table_name = $wpdb->prefix . self::$table_name;
         
-        $where = $active_only ? 'WHERE active = 1' : '';
+        if ($active_only) {
+            return $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE active = %d ORDER BY created_at DESC", 1));
+        }
         
-        return $wpdb->get_results("SELECT * FROM $table_name $where ORDER BY created_at DESC");
+        return $wpdb->get_results("SELECT * FROM $table_name ORDER BY created_at DESC");
     }
     
     /**
@@ -103,7 +105,7 @@ class SuperRSS_DB {
             $update_data['active'] = intval($data['active']);
         }
         if (isset($data['last_fetch'])) {
-            $update_data['last_fetch'] = $data['last_fetch'];
+            $update_data['last_fetch'] = sanitize_text_field($data['last_fetch']);
         }
         
         return $wpdb->update($table_name, $update_data, array('id' => intval($id)));

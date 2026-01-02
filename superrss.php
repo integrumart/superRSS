@@ -59,11 +59,6 @@ class SuperRSS {
         
         // Cron job for fetching RSS feeds
         add_action('superrss_fetch_feeds', array('SuperRSS_Fetcher', 'fetch_all_feeds'));
-        
-        // Schedule cron if not scheduled
-        if (!wp_next_scheduled('superrss_fetch_feeds')) {
-            wp_schedule_event(time(), 'hourly', 'superrss_fetch_feeds');
-        }
     }
     
     public function activate() {

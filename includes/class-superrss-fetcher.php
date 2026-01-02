@@ -69,9 +69,18 @@ class SuperRSS_Fetcher {
             $content = $description;
         }
         
-        // Check if post with same title already exists
-        $existing_post = get_page_by_title($title, OBJECT, 'post');
-        if ($existing_post) {
+        // Sanitize content to prevent XSS attacks
+        $content = wp_kses_post($content);
+        
+        // Check if post with same title already exists using WP_Query (get_page_by_title is deprecated)
+        $existing_query = new WP_Query(array(
+            'post_type' => 'post',
+            'title' => $title,
+            'posts_per_page' => 1,
+            'fields' => 'ids'
+        ));
+        
+        if ($existing_query->have_posts()) {
             return false; // Post already exists
         }
         
