@@ -1,0 +1,96 @@
+/* SuperRSS Admin Styles */
+
+.superrss-container {
+    max-width: 1200px;
+    margin: 20px 0;
+}
+
+.superrss-add-form {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.superrss-add-form h2 {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.superrss-sources-list {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.superrss-sources-list h2 {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.superrss-status-active {
+    color: #46b450;
+    font-weight: bold;
+}
+
+.superrss-status-inactive {
+    color: #dc3232;
+    font-weight: bold;
+}
+
+.superrss-info {
+    background: #e5f5fa;
+    border: 1px solid #b8dce5;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.superrss-info h3 {
+    margin-top: 0;
+}
+
+.superrss-info p {
+    margin: 5px 0;
+}
+
+/* Loading indicator */
+.superrss-loading {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.superrss-loading:after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #2271b1;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: superrss-spin 0.6s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes superrss-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Buttons */
+.superrss-fetch-now {
+    margin-right: 5px;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+    .superrss-container {
+        margin: 10px 0;
+    }
+    
+    .superrss-add-form,
+    .superrss-sources-list {
+        padding: 10px;
+    }
+}
