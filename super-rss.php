@@ -136,7 +136,7 @@ class SuperRSS {
         // URL'nin geçerli bir RSS feed olup olmadığını kontrol et
         $rss = fetch_feed($feed_url);
         if (is_wp_error($rss)) {
-            wp_send_json_error('Geçersiz RSS URL: ' . $rss->get_error_message());
+            wp_send_json_error('Geçersiz RSS URL. Lütfen doğru bir RSS feed URL\'si girdiğinizden emin olun.');
         }
         
         // Feed adı boşsa, RSS başlığını kullan
@@ -239,10 +239,12 @@ class SuperRSS {
         $rss = fetch_feed($feed->feed_url);
         
         if (is_wp_error($rss)) {
-            return array('success' => false, 'message' => 'RSS çekilemedi: ' . $rss->get_error_message());
+            return array('success' => false, 'message' => 'RSS çekilemedi. Lütfen feed URL\'sini kontrol edin.');
         }
         
-        $maxitems = $rss->get_item_quantity(10);
+        // Maksimum öğe sayısını al (varsayılan: 10, filtre ile değiştirilebilir)
+        $max_items = apply_filters('super_rss_max_items', 10);
+        $maxitems = $rss->get_item_quantity($max_items);
         $rss_items = $rss->get_items(0, $maxitems);
         
         $imported_count = 0;
@@ -266,12 +268,15 @@ class SuperRSS {
                 continue; // Bu post zaten var
             }
             
+            // Varsayılan yazar ID'sini al - ilk admin kullanıcı veya mevcut kullanıcı
+            $default_author = $this->get_default_author();
+            
             // Post oluştur
             $post_data = array(
                 'post_title' => $title,
                 'post_content' => !empty($content) ? $content : $description,
                 'post_status' => 'publish',
-                'post_author' => 1,
+                'post_author' => $default_author,
                 'post_date' => $date,
                 'post_type' => 'post'
             );
@@ -299,6 +304,43 @@ class SuperRSS {
             'success' => true,
             'message' => $imported_count . ' yeni yazı içe aktarıldı'
         );
+    }
+    
+    /**
+     * Varsayılan yazar ID'sini al
+     */
+    private function get_default_author() {
+        // Önce mevcut kullanıcıyı dene
+        $current_user_id = get_current_user_id();
+        if ($current_user_id > 0) {
+            return $current_user_id;
+        }
+        
+        // İlk admin kullanıcıyı bul
+        $admins = get_users(array(
+            'role' => 'administrator',
+            'number' => 1,
+            'orderby' => 'ID',
+            'order' => 'ASC'
+        ));
+        
+        if (!empty($admins)) {
+            return $admins[0]->ID;
+        }
+        
+        // Herhangi bir kullanıcı bul
+        $users = get_users(array(
+            'number' => 1,
+            'orderby' => 'ID',
+            'order' => 'ASC'
+        ));
+        
+        if (!empty($users)) {
+            return $users[0]->ID;
+        }
+        
+        // Son çare: 1 döndür
+        return 1;
     }
 }
 
