@@ -105,7 +105,10 @@ class SuperRSS_DB {
             $update_data['active'] = intval($data['active']);
         }
         if (isset($data['last_fetch'])) {
-            $update_data['last_fetch'] = sanitize_text_field($data['last_fetch']);
+            // Validate datetime format before insertion
+            if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $data['last_fetch'])) {
+                $update_data['last_fetch'] = $data['last_fetch'];
+            }
         }
         
         return $wpdb->update($table_name, $update_data, array('id' => intval($id)));

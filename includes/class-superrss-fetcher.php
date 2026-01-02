@@ -72,15 +72,14 @@ class SuperRSS_Fetcher {
         // Sanitize content to prevent XSS attacks
         $content = wp_kses_post($content);
         
-        // Check if post with same title already exists using WP_Query (get_page_by_title is deprecated)
-        $existing_query = new WP_Query(array(
-            'post_type' => 'post',
-            'title' => $title,
-            'posts_per_page' => 1,
-            'fields' => 'ids'
+        // Check if post with same title already exists
+        global $wpdb;
+        $existing_post = $wpdb->get_var($wpdb->prepare(
+            "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'post' AND post_status != 'trash' LIMIT 1",
+            wp_strip_all_tags($title)
         ));
         
-        if ($existing_query->have_posts()) {
+        if ($existing_post) {
             return false; // Post already exists
         }
         
@@ -142,6 +141,28 @@ class SuperRSS_Fetcher {
      * Set featured image from URL
      */
     private static function set_featured_image($post_id, $image_url) {
+        // Validate URL
+        if (!filter_var($image_url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+        
+        // Check if URL uses http or https
+        $parsed_url = parse_url($image_url);
+        if (!in_array($parsed_url['scheme'], array('http', 'https'))) {
+            return false;
+        }
+        
+        // Get file extension and validate image type
+        $allowed_extensions = array('jpg', 'jpeg', 'png', 'gif', 'webp');
+        $file_extension = strtolower(pathinfo($image_url, PATHINFO_EXTENSION));
+        
+        // Remove query parameters if present
+        $file_extension = preg_replace('/\?.*/', '', $file_extension);
+        
+        if (!in_array($file_extension, $allowed_extensions)) {
+            return false;
+        }
+        
         require_once(ABSPATH . 'wp-admin/includes/media.php');
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         require_once(ABSPATH . 'wp-admin/includes/image.php');
