@@ -121,12 +121,12 @@ class SuperRSS_Fetcher {
             
             // Try to get and set featured image
             $enclosure = $item->get_enclosure();
-            if ($enclosure) {
+            if ($enclosure && method_exists($enclosure, 'get_thumbnail')) {
                 $image_url = $enclosure->get_thumbnail();
-                if (!$image_url) {
+                if (!$image_url && method_exists($enclosure, 'get_link')) {
                     $image_url = $enclosure->get_link();
                 }
-                if ($image_url) {
+                if ($image_url && is_string($image_url) && !empty($image_url)) {
                     self::set_featured_image($post_id, $image_url);
                 }
             }
@@ -172,6 +172,8 @@ class SuperRSS_Fetcher {
         if (!is_wp_error($image_id)) {
             set_post_thumbnail($post_id, $image_id);
             return true;
+        } else {
+            error_log('SuperRSS: Failed to import featured image from ' . $image_url . ' - ' . $image_id->get_error_message());
         }
         
         return false;
